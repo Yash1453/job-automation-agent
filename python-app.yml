@@ -1,0 +1,28 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install minimal dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml python-dotenv fake-useragent flake8
+      - name: Syntax check
+        run: python -m py_compile job_agent_complete.py scrapers.py form_automation.py check_results.py
+      - name: Lint with flake8
+        run: flake8 --max-line-length=120 job_agent_complete.py scrapers.py form_automation.py check_results.py
